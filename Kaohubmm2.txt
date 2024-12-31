@@ -1,0 +1,95 @@
+﻿-- Đảm bảo script này được đặt trong LocalScript (ví dụ: trong StarterPlayerScripts hoặc StarterCharacterScripts)
+
+
+local player = game.Players.LocalPlayer
+local role = player:WaitForChild("Role")  -- Vai trò của người chơi, ví dụ: Murderer, Sheriff, Innocent
+local buttonShoot = script.Parent:WaitForChild("ButtonShoot")  -- Nút bắn trong GUI
+local buttonAim = script.Parent:WaitForChild("ButtonAim")  -- Nút Aim trong GUI
+
+
+local aiming = false  -- Biến để theo dõi trạng thái ngắm
+
+
+-- Tạo ESP cho người chơi
+local function createESP()
+    -- Tạo BillboardGui để hiển thị tên vai trò
+    local esp = Instance.new("BillboardGui")
+    esp.Adornee = player.Character
+    esp.Size = UDim2.new(0, 100, 0, 50)
+    esp.StudsOffset = Vector3.new(0, 3, 0)
+    esp.Parent = player.PlayerGui
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextScaled = true
+    label.Text = role.Value
+    label.Parent = esp
+end
+
+
+-- Tạo chức năng bắn cho Sheriff
+local function shoot()
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        local gun = player.Backpack:FindFirstChild("Gun")  -- Giả sử có một vũ khí tên là "Gun"
+        if gun then
+            gun:Activate()  -- Hoặc gọi một hành động khác tùy thuộc vào vũ khí
+        end
+    end
+end
+
+
+-- Tạo chức năng ngắm cho Murderer
+local function aim()
+    if role.Value == "Murderer" then
+        aiming = true
+        -- Hiển thị UI ngắm hoặc thay đổi trạng thái của nhân vật khi ngắm
+        print("Đang ngắm...")
+    else
+        print("Chỉ Murderer mới có thể ngắm!")
+    end
+end
+
+
+-- Tạo hành động cho Murderer khi nhấn Aim
+buttonAim.MouseButton1Click:Connect(function()
+    aim()  -- Khi nhấn nút Aim, sẽ gọi hàm aim()
+end)
+
+
+-- Tạo hành động bắn khi nhấn nút Shoot
+buttonShoot.MouseButton1Click:Connect(function()
+    if role.Value == "Sheriff" then
+        shoot()  -- Chỉ cho phép Sheriff bắn
+    elseif role.Value == "Murderer" and aiming then
+        -- Nếu người chơi là Murderer và đang trong trạng thái ngắm, thực hiện hành động giết người
+        print("Giết người! Murderer đã bắn.")
+        -- Thực hiện hành động giết người tại đây, ví dụ: hạ gục một người chơi hoặc tương tác với một mục tiêu.
+    else
+        print("Chỉ Murderer mới có thể giết người khi đang ngắm!")
+    end
+end)
+
+
+-- Gọi hàm khi vai trò thay đổi
+role.Changed:Connect(createESP)
+
+
+-- Kiểm tra và xử lý vai trò
+local function handleRole()
+    if role.Value == "Murderer" then
+        -- Hành động cho Murderer
+        print("Bạn là Murderer!")
+    elseif role.Value == "Sheriff" then
+        -- Hành động cho Sheriff
+        print("Bạn là Sheriff!")
+    else
+        -- Hành động cho Innocent
+        print("Bạn là Innocent!")
+    end
+end
+
+
+-- Gọi hàm xử lý vai trò khi script bắt đầu
+handleRole()
